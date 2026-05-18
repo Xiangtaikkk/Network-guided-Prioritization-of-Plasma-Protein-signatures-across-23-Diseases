@@ -1,0 +1,9 @@
+# Python dependencies for the core analysis pipeline (src/).
+# scikit-learn is pinned to the version used in the manuscript.
+numpy
+pandas
+scipy
+joblib
+scikit-learn==1.6.1
+xgboost
+pyyaml
