@@ -50,9 +50,6 @@ No data are distributed with this code.
 - UKB-PPP data are available to approved researchers through application to the
   UK Biobank (https://www.ukbiobank.ac.uk/enable-your-research).
 
-The `example/` folder contains a small **synthetic** data set that can be used
-to check that the code runs; it has no biological meaning.
-
 ## Installation
 
 ```bash
@@ -73,20 +70,18 @@ Input files (tab-separated):
 | `--deps` | limma result table of the disease | `protein`, `logFC`, `adj.P.Val` |
 | `--universe` | list of tested proteins | one protein per line |
 
-Run the synthetic example:
+Command line (one disease at a time):
 
 ```bash
-python example/make_example_data.py
 python src/coexpression_modules.py \
-    --npx example/example_npx.tsv \
-    --deps example/example_limma.tsv \
-    --universe example/example_universe.txt \
-    --top-fraction 0.5 \
-    --out example_output
+    --npx <disease_npx_matrix.tsv> \
+    --deps <disease_limma_results.tsv> \
+    --universe <shared_proteins.txt> \
+    --out <output_directory>
 ```
 
-(`--top-fraction 0.5` is used only because the example contains 120 proteins; the
-manuscript analysis uses the default of 0.05.)
+To start from an existing edge table instead of an NPX matrix, replace `--npx` by
+`--edges`. The defaults are the parameters used in the manuscript (see below).
 
 Outputs written to `--out`:
 
@@ -165,7 +160,6 @@ independently (see "Input data requirements" below).
 ├── requirements-modules.txt        pip requirements of the module code (Part 1)
 ├── config.example.yaml             template for the local path configuration
 ├── pipeline_overview.md            three-stage design of the machine-learning scripts
-├── example/                        synthetic example for the module code (Part 1)
 └── src/
     ├── coexpression_modules.py     Part 1 - network and module construction
     ├── config.py                   centralised path resolution
