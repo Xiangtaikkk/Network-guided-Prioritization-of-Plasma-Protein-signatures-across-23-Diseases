@@ -1,0 +1,7 @@
+# Dependencies of src/coexpression_modules.py (versions used for the manuscript)
+numpy>=1.26
+pandas>=2.2
+scipy>=1.13
+statsmodels>=0.14
+python-igraph==1.0.0
+leidenalg==0.12.0

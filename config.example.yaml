@@ -1,0 +1,9 @@
+# Copy this file to config.yaml and edit the paths for your local environment.
+# The real HDBA and UKB-PPP data are access-controlled and are not distributed
+# with this repository.
+
+HPA_DATA: data/HDBA/hpa_data.tsv
+HPA_META: data/HDBA/hpa_meta.tsv
+UKB_DATA: data/UKB/ukb_data_disease.txt
+DATA_DIR: data/UKB
+RESULT_DIR: results
