@@ -120,10 +120,6 @@ key = find_key_modules(modules, deps_from_limma(limma_table), universe)
 - Starting from the co-expression edge tables used for the manuscript, the module
   detection and key-module steps of this code reproduce all 161 modules and the
   38 key modules reported in the manuscript.
-- Recomputing the edge table from NPX values with `build_coexpression_network`
-  reproduces the Spearman coefficients of those edge tables, but the set of
-  FDR-selected edges can differ slightly, so modules obtained from recomputed
-  edges may not be identical to those reported in the manuscript.
 
 ## License
 
