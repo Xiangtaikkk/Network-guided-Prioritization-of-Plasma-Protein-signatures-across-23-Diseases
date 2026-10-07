@@ -27,9 +27,10 @@ manuscript ("Protein association network and disease-related key modules").
 For one disease at a time, `src/coexpression_modules.py` performs three steps:
 
 1. **Network construction** (`build_coexpression_network`)
-   Spearman correlation between all protein pairs of the disease cohort;
-   Benjamini-Hochberg correction across all protein pairs; positive associations
-   with FDR < 0.05 are kept as edges.
+   Spearman correlation between all protein pairs of the disease cohort (pairwise-complete
+   observations if NPX values are missing); Benjamini-Hochberg correction across all protein
+   pairs; positive associations with FDR < 0.05 are kept as edges. All proteins measured in
+   the cohort are included.
 2. **Module detection** (`detect_modules`)
    The strongest 5% of the positive edges (ranked by correlation strength) define
    the network. Modules are detected with the Leiden algorithm (modularity vertex

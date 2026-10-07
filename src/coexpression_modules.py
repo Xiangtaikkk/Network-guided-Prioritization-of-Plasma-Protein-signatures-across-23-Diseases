@@ -8,8 +8,9 @@ Signatures across 23 Diseases".
 The module pipeline has three steps, applied to one disease at a time:
 
 1. ``build_coexpression_network``  - Spearman correlation between all protein
-   pairs, Benjamini-Hochberg (BH) correction across all protein pairs, and
-   retention of positive associations with FDR < 0.05 as network edges.
+   pairs (pairwise-complete observations if NPX values are missing),
+   Benjamini-Hochberg (BH) correction across all protein pairs, and retention
+   of positive associations with FDR < 0.05 as network edges.
 2. ``detect_modules``              - the strongest ``top_fraction`` (default 5%)
    of the positive edges (ranked by correlation strength) define the network;
    modules are detected with the Leiden algorithm (modularity vertex
@@ -45,18 +46,46 @@ DEP_FDR = 0.05            # DEP: adjusted P < 0.05 ...
 DEP_ABS_LOGFC = 1.0       # ... and |log2 fold change| > 1
 
 
+def spearman_pairwise_complete(values: np.ndarray):
+    """Spearman correlation and P value matrices with pairwise-complete observations.
+
+    For protein pairs without missing values the correlation is computed on the full matrix;
+    for pairs involving a protein with missing NPX values, only the samples measured for both
+    proteins are used (ranks are recomputed within each pair).
+    """
+    n_prot = values.shape[1]
+    has_na = np.isnan(values).any(axis=0)
+    complete = np.where(~has_na)[0]
+    rho = np.full((n_prot, n_prot), np.nan)
+    pval = np.full((n_prot, n_prot), np.nan)
+    r0, p0 = spearmanr(values[:, complete])
+    rho[np.ix_(complete, complete)] = r0
+    pval[np.ix_(complete, complete)] = p0
+    incomplete = set(np.where(has_na)[0])
+    for i in incomplete:
+        for j in range(n_prot):
+            if j == i or (j < i and j in incomplete):
+                continue
+            keep = ~(np.isnan(values[:, i]) | np.isnan(values[:, j]))
+            if keep.sum() < 4:
+                continue
+            r, p = spearmanr(values[keep, i], values[keep, j])
+            rho[i, j] = rho[j, i] = r
+            pval[i, j] = pval[j, i] = p
+    return rho, pval
+
+
 def build_coexpression_network(npx: pd.DataFrame, fdr: float = FDR_THRESHOLD,
                                positive_only: bool = True) -> pd.DataFrame:
     """Co-expression edge table from a samples x proteins NPX matrix.
 
-    Spearman correlations for all protein pairs; P values are BH-corrected
-    across all pairs of the disease network; edges with FDR < ``fdr`` (and
-    positive correlation if ``positive_only``) are returned as a table with
-    columns ``protein_1, protein_2, weight`` (Spearman rho) and ``padj``.
+    Spearman correlations for all protein pairs (pairwise-complete observations if NPX values
+    are missing); P values are BH-corrected across all protein pairs of the disease network;
+    edges with FDR < ``fdr`` (and positive correlation if ``positive_only``) are returned as a
+    table with columns ``protein_1, protein_2, weight`` (Spearman rho) and ``padj``.
+    All proteins measured in the cohort are included (no pre-selection).
     """
-    if npx.isna().any().any():
-        raise ValueError("NPX matrix contains missing values; impute within the disease cohort first.")
-    rho, pval = spearmanr(npx.values)
+    rho, pval = spearman_pairwise_complete(npx.values.astype(float))
     cols = np.array(npx.columns)
     i, j = np.triu_indices(len(cols), k=1)
     edges = pd.DataFrame({"protein_1": cols[i], "protein_2": cols[j],
